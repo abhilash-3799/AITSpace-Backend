@@ -35,17 +35,35 @@ public class QueueServiceImpl implements QueueService {
         return QueueMapper.toResponse(queue);
     }
 
-    @Override
-    public QueueResponseDTO getById(String id) {
-        Queue queue = queueRepo.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Queue not found"));
-        return QueueMapper.toResponse(queue);
+//    @Override
+//    public QueueResponseDTO getById(String id) {
+//        Queue queue = queueRepo.findById(id)
+//                .orElseThrow(() -> new ResourceNotFoundException("Queue not found"));
+//        return QueueMapper.toResponse(queue);
+//    }
+@Override
+public QueueResponseDTO getById(String id) {
+    Queue queue = queueRepo.findByIdWithRelations(id);
+
+    if (queue == null) {
+        throw new ResourceNotFoundException("Queue not found");
     }
 
-    @Override
-    public List<QueueResponseDTO> getAll() {
-        return queueRepo.findAll().stream().map(QueueMapper::toResponse).collect(Collectors.toList());
-    }
+    return QueueMapper.toResponse(queue);
+}
+
+//    @Override
+//    public List<QueueResponseDTO> getAll() {
+//        return queueRepo.findAll().stream().map(QueueMapper::toResponse).collect(Collectors.toList());
+//    }
+@Override
+public List<QueueResponseDTO> getAll() {
+    return queueRepo.findAllWithRelations()
+            .stream()
+            .map(QueueMapper::toResponse)
+            .collect(Collectors.toList());
+}
+
 
     @Override
     public QueueResponseDTO update(String id, QueueRequestDTO dto) {

@@ -1,5 +1,6 @@
 package com.ait.mrb_fp.dto.request;
 
+import com.ait.mrb_fp.entity.Notification.NotificationType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.*;
@@ -22,4 +23,9 @@ public class NotificationRequestDTO {
     @NotBlank(message = "Message is required")
     @Size(max = 500, message = "Message must not exceed 500 characters")
     private String message;
+
+
+    private String seatNumber;
+    private String cancellationReason;
+    private NotificationType notificationType = NotificationType.GENERAL;
 }

@@ -75,30 +75,54 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
 
-    @Override
-    public EmployeeResponseDTO getEmployeeById(String employeeId) {
-        if (employeeId == null || employeeId.isBlank())
-            throw new MissingRequestParameterException("Employee ID must not be empty.");
+//    @Override
+//    public EmployeeResponseDTO getEmployeeById(String employeeId) {
+//        if (employeeId == null || employeeId.isBlank())
+//            throw new MissingRequestParameterException("Employee ID must not be empty.");
+//
+//        Employee employee = employeeRepository.findById(employeeId)
+//                .orElseThrow(() -> new EmployeeNotFoundException("Employee not found with ID: " + employeeId));
+//
+//        return EmployeeMapper.toResponse(employee);
+//    }
+@Override
+public EmployeeResponseDTO getEmployeeById(String employeeId) {
+    if (employeeId == null || employeeId.isBlank())
+        throw new MissingRequestParameterException("Employee ID must not be empty.");
 
-        Employee employee = employeeRepository.findById(employeeId)
-                .orElseThrow(() -> new EmployeeNotFoundException("Employee not found with ID: " + employeeId));
+    Employee employee = employeeRepository.findByIdWithRelations(employeeId);
 
-        return EmployeeMapper.toResponse(employee);
+    if (employee == null)
+        throw new EmployeeNotFoundException("Employee not found with ID: " + employeeId);
+
+    return EmployeeMapper.toResponse(employee);
+}
+
+//    @Override
+//    public List<EmployeeResponseDTO> getAllEmployees() {
+//        try {
+//            return employeeRepository.findByIsActiveTrue()
+//                    .stream()
+//                    .map(EmployeeMapper::toResponse)
+//                    .collect(Collectors.toList());
+//        } catch (DataAccessException ex) {
+//            throw new DatabaseException("Error fetching employees from database.");
+//        } catch (Exception ex) {
+//            throw new InternalServerException("Unexpected error while fetching employees.");
+//        }
+//    }
+@Override
+public List<EmployeeResponseDTO> getAllEmployees() {
+    try {
+        return employeeRepository.findAllWithRelations()
+                .stream()
+                .map(EmployeeMapper::toResponse)
+                .collect(Collectors.toList());
+    } catch (Exception ex) {
+        throw new InternalServerException("Unexpected error while fetching employees.");
     }
+}
 
-    @Override
-    public List<EmployeeResponseDTO> getAllEmployees() {
-        try {
-            return employeeRepository.findByIsActiveTrue()
-                    .stream()
-                    .map(EmployeeMapper::toResponse)
-                    .collect(Collectors.toList());
-        } catch (DataAccessException ex) {
-            throw new DatabaseException("Error fetching employees from database.");
-        } catch (Exception ex) {
-            throw new InternalServerException("Unexpected error while fetching employees.");
-        }
-    }
 
 
     @Override

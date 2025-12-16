@@ -1,5 +1,6 @@
 package com.ait.mrb_fp.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 

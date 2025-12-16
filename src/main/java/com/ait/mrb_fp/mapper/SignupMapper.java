@@ -1,4 +1,3 @@
-// SignupMapper.java
 package com.ait.mrb_fp.mapper;
 
 import com.ait.mrb_fp.dto.request.SignupRequestDTO;
@@ -11,26 +10,22 @@ public class SignupMapper {
 
     private SignupMapper() {}
 
-    public static UserLogin toEntity(SignupRequestDTO req, Employee employee, PasswordEncoder encoder) {
-        return UserLogin.builder()
-                .employee(employee)
-                .username(req.getUsername())
-                .email(req.getEmail())  // Map email
-                .password(encoder.encode(req.getPassword()))
-                .role(UserLogin.Role.valueOf(req.getRole()))
-                .isActive(true)
-                .build();
+    public static UserLogin toEntity(SignupRequestDTO r, Employee e, PasswordEncoder encoder) {
+        UserLogin u = new UserLogin();
+        u.setEmployee(e);
+        u.setUsername(r.getUsername());
+        u.setPassword(encoder.encode(r.getPassword()));
+        u.setRole(UserLogin.Role.valueOf(r.getRole().toUpperCase()));
+        u.setActive(true);
+        return u;
     }
 
-    public static SignupResponseDTO toResponse(UserLogin user, String message, boolean success) {
+    public static SignupResponseDTO toResponse(UserLogin u, String message, boolean success) {
         return SignupResponseDTO.builder()
                 .success(success)
                 .message(message)
-                .loginId(user.getLoginId())
-                .username(user.getUsername())
-                .email(user.getEmail())  // Include email in response
-                .role(user.getRole().name())
-                .employeeName(user.getEmployee().getFirstName() + " " + user.getEmployee().getLastName())
+                .username(u.getUsername())
+                .role(u.getRole().name())
                 .build();
     }
 }

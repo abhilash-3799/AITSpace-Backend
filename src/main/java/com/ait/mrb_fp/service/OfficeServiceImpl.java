@@ -44,6 +44,19 @@ public class OfficeServiceImpl implements OfficeService {
                 throw new DuplicateResourceException("Office with name already exists: " + dto.getOfficeName());
             }
 
+
+            String cleanName = dto.getOfficeName().trim();
+            String normalizedName = cleanName.toLowerCase();
+
+
+             exists = officeRepository.existsByOfficeNameIgnoreCase(normalizedName);
+            if (exists) {
+                throw new DuplicateResourceException("Office with this name already exists: " + cleanName);
+            }
+
+
+            dto.setOfficeName(cleanName);
+
             Office office = OfficeMapper.toEntity(dto);
 
             office.setActive(true);

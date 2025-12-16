@@ -40,6 +40,17 @@ public class TeamServiceImpl implements TeamService {
                 throw new DuplicateResourceException("Team with name already exists: " + dto.getTeamName());
             }
 
+            String cleanName = dto.getTeamName().trim();
+            String normalizedName = cleanName.toLowerCase();
+
+
+            exists = teamRepository.existsByTeamNameIgnoreCase(normalizedName);
+            if (exists) {
+                throw new DuplicateResourceException("Office with this name already exists: " + cleanName);
+            }
+
+
+            dto.setTeamName(cleanName);
             Team team = TeamMapper.toEntity(dto);
 
             team.setActive(true);
@@ -54,34 +65,53 @@ public class TeamServiceImpl implements TeamService {
     }
 
 
+//    @Override
+//    public TeamResponseDTO getTeamById(String teamId) {
+//        if (teamId == null || teamId.isBlank()) {
+//            throw new MissingRequestParameterException("Team ID cannot be empty.");
+//        }
+//
+//        Team team = teamRepository.findById(teamId)
+//                .orElseThrow(() -> new TeamNotFoundException("Team not found with ID: " + teamId));
+//
+//        if (!team.isActive()) {
+//            throw new InvalidStateException("Team is inactive. Reactivate before accessing.");
+//        }
+//
+//        return TeamMapper.toResponse(team);
+//    }
+
     @Override
     public TeamResponseDTO getTeamById(String teamId) {
         if (teamId == null || teamId.isBlank()) {
             throw new MissingRequestParameterException("Team ID cannot be empty.");
         }
 
-        Team team = teamRepository.findById(teamId)
+        return teamRepository.findByIdAsDto(teamId)
                 .orElseThrow(() -> new TeamNotFoundException("Team not found with ID: " + teamId));
-
-        if (!team.isActive()) {
-            throw new InvalidStateException("Team is inactive. Reactivate before accessing.");
-        }
-
-        return TeamMapper.toResponse(team);
     }
 
 
-    @Override
-    public List<TeamResponseDTO> getAllTeams() {
-        try {
-            return teamRepository.findByIsActiveTrue()
-                    .stream()
-                    .map(TeamMapper::toResponse)
-                    .collect(Collectors.toList());
-        } catch (DataAccessException ex) {
-            throw new DatabaseException("Database error occurred while fetching team list.");
-        }
+
+//    @Override
+//    public List<TeamResponseDTO> getAllTeams() {
+//        try {
+//            return teamRepository.findByIsActiveTrue()
+//                    .stream()
+//                    .map(TeamMapper::toResponse)
+//                    .collect(Collectors.toList());
+//        } catch (DataAccessException ex) {
+//            throw new DatabaseException("Database error occurred while fetching team list.");
+//        }
+//    }
+@Override
+public List<TeamResponseDTO> getAllTeams() {
+    try {
+        return teamRepository.findAllActiveAsDto();
+    } catch (DataAccessException ex) {
+        throw new DatabaseException("Database error occurred while fetching team list.");
     }
+}
 
 
     @Override
