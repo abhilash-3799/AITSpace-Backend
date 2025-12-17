@@ -1,7 +1,7 @@
 <configuration>
 
     <property name="LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{36} - %msg%n"/>
-    <property name="LOG_DIR" value="C:\AITSPACE\Logs"/>
+    <property name="LOG_DIR" value="D:\AIT\JavaTraining\Project\logs"/>
 
     <!-- Console Logs -->
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
