@@ -15,6 +15,9 @@ public interface BookingRepository extends JpaRepository<Booking, String> {
 
     List<Booking> findByRoomNameAndDate(String roomName, LocalDate date);
 
+
+
+
     List<Booking> findByRoomNameAndDateAndStatus(String roomName, LocalDate date, String status);
 
     @Query("SELECT b FROM Booking b WHERE b.roomName = :roomName " +

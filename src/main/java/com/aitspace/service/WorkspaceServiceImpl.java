@@ -3,6 +3,7 @@ package com.aitspace.service;
 import com.aitspace.dto.request.WorkspaceRequestDto;
 import com.aitspace.dto.response.WorkspaceResponseDto;
 import com.aitspace.entity.Workspace;
+import com.aitspace.exception.DuplicateResourceException;
 import com.aitspace.mapper.WorkspaceMapper;
 import com.aitspace.repository.WorkspaceRepository;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +18,13 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     private final WorkspaceRepository repository;
 
     @Override
-    public WorkspaceResponseDto create(WorkspaceRequestDto dto) {
+    public WorkspaceResponseDto create(WorkspaceRequestDto dto)
+    {
+        boolean exists = WorkspaceRepository.existsByName(dto.getName());
+        if (exists) {
+            throw new DuplicateResourceException("Office name already exists: " + dto.getName());
+        }
+
         return WorkspaceMapper.toDto(repository.save(WorkspaceMapper.toEntity(dto)));
     }
 

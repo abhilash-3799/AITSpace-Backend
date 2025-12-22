@@ -1,25 +1,39 @@
 package com.aitspace.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.List;
 
 @Entity
-@Table(name = "bookings")
-@Data
+@Table(name = "bookings",
+        uniqueConstraints = {
+                @UniqueConstraint(name = "uk_booking_id", columnNames = {"booking_id_string"})
+                // Removed unique constraint on email
+        })
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Booking {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private String id;
+    /* =========================
+       FOREIGN KEY → EMPLOYEE
+       ========================= */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(
+            name = "employee_id",
+            referencedColumnName = "employeeId",
+            nullable = false
+    )
+    private Employee employee;
 
+    /* =========================
+       EXISTING FIELDS (UNCHANGED)
+       ========================= */
     @Column(name = "type", nullable = false)
     private String type = "meeting";
 
@@ -41,11 +55,11 @@ public class Booking {
     @Column(name = "end_time", nullable = false)
     private LocalTime endTime;
 
-    @ElementCollection
-    @CollectionTable(name = "booking_amenities",
-            joinColumns = @JoinColumn(name = "booking_id"))
-    @Column(name = "amenity")
-    private List<String> amenities;
+    /* =========================
+       AMENITIES (SAME COLUMN)
+       ========================= */
+    @Column(name = "amenities", columnDefinition = "TEXT")
+    private String amenities;
 
     @Column(name = "status")
     private String status = "Active";
@@ -56,23 +70,44 @@ public class Booking {
     @Column(name = "reminder_sent")
     private Boolean reminderSent = false;
 
-    @Column(name = "booked_at")
-    private LocalDateTime bookedAt;
-
     @Column(name = "attendees")
     private String attendees;
 
-    @Column(name = "email")
+    @Column(name = "email", nullable = false)
+
     private String email;
 
-    @Column(name = "booking_id_string")
+    @Id
+    @Column(name = "booking_id_string", unique = true, nullable = false)
     private String bookingIdString;
 
+    /* =========================
+       AUDIT FIELDS
+       ========================= */
+    @Column(name = "created_at", updatable = false)
+    private LocalDateTime createdAt;
+
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
+
+    /* =========================
+       ENTITY LIFECYCLE
+       ========================= */
     @PrePersist
     protected void onCreate() {
-        bookedAt = LocalDateTime.now();
-        if (bookingIdString == null) {
-            bookingIdString = "BK-" + System.currentTimeMillis();
+        this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
+
+        if (this.bookingIdString == null) {
+            this.bookingIdString = "BK-" + System.currentTimeMillis();
         }
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        this.updatedAt = LocalDateTime.now();
     }
 }
