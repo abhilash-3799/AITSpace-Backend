@@ -1,4 +1,3 @@
-// LoginMapper.java
 package com.aitspace.mapper;
 
 import com.aitspace.dto.response.LoginResponseDTO;
@@ -9,9 +8,11 @@ public class LoginMapper {
     private LoginMapper() {}
 
     public static LoginResponseDTO toResponse(UserLogin u) {
+
         return LoginResponseDTO.builder()
                 .loginId(u.getLoginId())
-                .employeeId(u.getEmployee() != null ? u.getEmployee().getEmployeeId() : null)
+                .employeeId(u.getEmployee().getEmployeeId())
+                .employeeNumber(u.getEmployee().getEmployeeNumber())  // ADD THIS
                 .employeeName(u.getEmployee() != null
                         ? u.getEmployee().getFirstName() + " " + u.getEmployee().getLastName()
                         : null)

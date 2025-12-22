@@ -14,6 +14,7 @@ public class SignupMapper {
         UserLogin u = new UserLogin();
         u.setEmployee(e);
         u.setUsername(r.getUsername());
+        u.setEmail(r.getEmail().toLowerCase().trim());
         u.setPassword(encoder.encode(r.getPassword()));
         u.setRole(UserLogin.Role.valueOf(r.getRole().toUpperCase()));
         u.setActive(true);
@@ -24,7 +25,12 @@ public class SignupMapper {
         return SignupResponseDTO.builder()
                 .success(success)
                 .message(message)
+                .loginId(u.getLoginId())
                 .username(u.getUsername())
+                .email(u.getEmail())
+                .employeeName(u.getEmployee() != null
+                        ? u.getEmployee().getFirstName() + " " + u.getEmployee().getLastName()
+                        : "N/A")
                 .role(u.getRole().name())
                 .build();
     }

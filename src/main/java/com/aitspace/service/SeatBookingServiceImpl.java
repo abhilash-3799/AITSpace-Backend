@@ -17,6 +17,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -29,7 +31,6 @@ public class SeatBookingServiceImpl implements SeatBookingService {
 
     @Override
     public SeatBookingResponseDTO create(SeatBookingRequestDTO dto) {
-
         Seat seat = seatRepo
                 .findBySeatNumberAndOffice_OfficeName(
                         dto.getSeatNumber(),
@@ -56,14 +57,15 @@ public class SeatBookingServiceImpl implements SeatBookingService {
         }
 
         if (bookingRepo.existsOverlappingBooking(seat.getSeatId(), start, end)) {
-            throw new BookingConflictException("Seat already booked");
+            throw new BookingConflictException("Seat already booked for the selected time");
         }
 
         SeatBooking booking = SeatBooking.builder()
                 .seat(seat)
                 .employee(employee)
-                .startDateTime(start)
-                .endDateTime(end)
+                .seatBookingDate(dto.getBookingDate())
+                .startTime(start)
+                .endTime(end)
                 .build();
 
         bookingRepo.save(booking);
@@ -77,7 +79,6 @@ public class SeatBookingServiceImpl implements SeatBookingService {
 
     @Override
     public void cancel(String bookingId) {
-
         SeatBooking booking = bookingRepo.findById(bookingId)
                 .orElseThrow(() ->
                         new ResourceNotFoundException("Booking not found"));
@@ -96,5 +97,93 @@ public class SeatBookingServiceImpl implements SeatBookingService {
 
         bookingRepo.save(booking);
         seatRepo.save(seat);
+    }
+
+    @Override
+    public List<SeatBookingResponseDTO> getAllBookings() {
+        return bookingRepo.findAll()
+                .stream()
+                .map(SeatBookingMapper::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public SeatBookingResponseDTO getBookingById(String bookingId) {
+        SeatBooking booking = bookingRepo.findById(bookingId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Booking not found with id: " + bookingId));
+        return SeatBookingMapper.toResponse(booking);
+    }
+
+    @Override
+    public SeatBookingResponseDTO updateBooking(String bookingId, SeatBookingRequestDTO dto) {
+        SeatBooking booking = bookingRepo.findById(bookingId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Booking not found"));
+
+        if (!booking.isActive()) {
+            throw new BadRequestException("Cannot update a cancelled booking");
+        }
+
+        Seat seat = seatRepo
+                .findBySeatNumberAndOffice_OfficeName(
+                        dto.getSeatNumber(),
+                        dto.getOfficeName()
+                )
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Seat not found"));
+
+        Employee employee = employeeRepo.findById(dto.getEmployeeId())
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Employee not found"));
+
+        LocalDateTime start =
+                LocalDateTime.of(dto.getBookingDate(), dto.getStartTime());
+        LocalDateTime end =
+                LocalDateTime.of(dto.getBookingDate(), dto.getEndTime());
+
+        if (!end.isAfter(start)) {
+            throw new BadRequestException("End time must be after start time");
+        }
+
+        if (start.isBefore(LocalDateTime.now())) {
+            throw new BookingConflictException("Booking time is in the past");
+        }
+
+        // Check for overlapping bookings excluding current booking
+        if (bookingRepo.existsOverlappingBookingExcludingCurrent(seat.getSeatId(), start, end, bookingId)) {
+            throw new BookingConflictException("Seat already booked for the selected time");
+        }
+
+        // Update old seat status
+        Seat oldSeat = booking.getSeat();
+        if (!oldSeat.getSeatId().equals(seat.getSeatId())) {
+            oldSeat.setAvailable(true);
+            oldSeat.setSeatStatus(Seat.SeatStatus.UNALLOCATED);
+            seatRepo.save(oldSeat);
+        }
+
+        // Update booking
+        booking.setSeat(seat);
+        booking.setEmployee(employee);
+        booking.setSeatBookingDate(dto.getBookingDate());
+        booking.setStartTime(start);
+        booking.setEndTime(end);
+
+        bookingRepo.save(booking);
+
+        // Update new seat status
+        seat.setAvailable(false);
+        seat.setSeatStatus(Seat.SeatStatus.ALLOCATED);
+        seatRepo.save(seat);
+
+        return SeatBookingMapper.toResponse(booking);
+    }
+
+    @Override
+    public List<SeatBookingResponseDTO> createBulkBooking(List<SeatBookingRequestDTO> dtos) {
+        return dtos.stream()
+                .map(this::create)
+                .collect(Collectors.toList());
     }
 }

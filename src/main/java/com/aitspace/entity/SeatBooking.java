@@ -3,6 +3,7 @@ package com.aitspace.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -27,11 +28,14 @@ public class SeatBooking {
     @JoinColumn(name = "employee_id", nullable = false)
     private Employee employee;
 
-    @Column(nullable = false)
-    private LocalDateTime startDateTime;
+    @Column(name = "seat_booking_date", nullable = false)
+    private LocalDate seatBookingDate;
 
-    @Column(nullable = false)
-    private LocalDateTime endDateTime;
+    @Column(name = "start_time", nullable = false)
+    private LocalDateTime startTime;
+
+    @Column(name = "end_time", nullable = false)
+    private LocalDateTime endTime;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

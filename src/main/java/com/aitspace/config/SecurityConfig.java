@@ -39,26 +39,26 @@ public class SecurityConfig {
                         sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
 
-                        .requestMatchers(
-                                "/api/auth/**",
-                                "/swagger-ui/**",
-                                "/swagger-ui.html",
-                                "/v3/api-docs/**",
+//                        .requestMatchers(
+//                                "/api/auth/**",
+//                                "/swagger-ui/**",
+//                                "/swagger-ui.html",
+//                                "/v3/api-docs/**",
+//
+//                                "/api/bookings/**",
+//                                "/api/seat/**",
+//                                "/api/seat-booking/**",
+//                                "/api/office/**",
+//                                "/api/meeting-room/**",
+//                                "/api/workspace/**",
+//                                "/api/rooms/**",
+//                                "/api/meeting-room-booking/**"
+//                        ).permitAll()
 
-                                "/api/bookings/**",
-                                "/api/seat/**",
-                                "/api/seat-booking/**",
-                                "/api/office/**",
-                                "/api/meeting-room/**",
-                                "/api/workspace/**",
-                                "/api/rooms/**",
-                                "/api/meeting-room-booking/**"
-                        ).permitAll()
-
-                        .anyRequest().authenticated()
-                )
-                .addFilterBefore(jwtAuthFilter,
-                        UsernamePasswordAuthenticationFilter.class);
+                        .anyRequest().permitAll() //authenticated
+                );
+//                .addFilterBefore(jwtAuthFilter,
+//                        UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }

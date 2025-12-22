@@ -23,8 +23,8 @@ public class SeatBookingMapper {
                                 booking.getEmployee().getLastName()
                                 : null
                 )
-                .startDateTime(booking.getStartDateTime())
-                .endDateTime(booking.getEndDateTime())
+                .startDateTime(booking.getStartTime())
+                .endDateTime(booking.getEndTime())
                 .status(booking.getStatus().name())
                 .isActive(booking.isActive())
                 .createdAt(booking.getCreatedAt())

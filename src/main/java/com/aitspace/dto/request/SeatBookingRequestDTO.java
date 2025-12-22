@@ -20,7 +20,6 @@ public class SeatBookingRequestDTO {
     @NotBlank
     private String officeName;
 
-    @NotBlank
     private String employeeId;
 
     @NotNull

@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final AuthService authService;
-    private final JwtUtil jwtUtil;
+    //private final JwtUtil jwtUtil;
 
     @PostMapping("/signup")
     public ResponseEntity<SignupResponseDTO> signup(@RequestBody SignupRequestDTO req) {

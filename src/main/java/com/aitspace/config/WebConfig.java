@@ -30,6 +30,7 @@ public class WebConfig implements WebMvcConfigurer {
         config.addAllowedOrigin("http://localhost:5173");
         config.addAllowedOrigin("http://localhost:3000");
         config.addAllowedOrigin("http://localhost:8080");
+        config.addAllowedOrigin("http://192.168.120.15:3000");
         config.addAllowedHeader("*");
         config.addAllowedMethod("OPTIONS");
         config.addAllowedMethod("GET");

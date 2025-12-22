@@ -1,7 +1,7 @@
 package com.aitspace.exception;
 
-public class InvalidCredentialsException extends UnauthorizedException {
-    public InvalidCredentialsException() {
-        super("Invalid username or password.");
+public class InvalidCredentialsException extends RuntimeException {
+    public InvalidCredentialsException(String message) {
+        super(message);
     }
 }
